@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="app">
-      <h3>{{ formatDuration(duration) }} {{ duration }}</h3>
+      <h3>{{ formatDuration(duration) }}</h3>
       <button @click="resume">Resume</button>
       <button @click="start" v-if="!isOn">Start</button>
       <button @click="pause" v-if="isOn">Pause</button>

@@ -1,3 +1,7 @@
+const isObject = (data) => {
+  return typeof data === 'object' && Object.prototype.toString.call(data).toLowerCase() === '[object object]' && !data.length
+}
+
 /**
  * 深度考评
  * @param {*} source
@@ -38,6 +42,27 @@ const matchExpression = function (textContent) {
   return expression
 }
 
+/**
+ * 是否是事件属性
+ * @param {*} node
+ */
+const isEventAttr = function (node) {
+  if (node.name.indexOf('@') === 0) {
+    return true
+  }
+  return false
+}
+
+/**
+ * 是否是指令属性
+ * @param {*} node
+ */
+const isDirectiveAttr = function (node) {
+  if (node.name.indexOf('v-') === 0) {
+    return true
+  }
+  return false
+}
 // test match
 // const test = '{{ a }} dfadf {{ func(a) }}'
 // var expressionObject = matchExpression(test)
@@ -58,5 +83,8 @@ const matchExpression = function (textContent) {
 module.exports = {
   deepCopy,
   assign,
-  matchExpression
+  matchExpression,
+  isEventAttr,
+  isDirectiveAttr,
+  isObject
 }
