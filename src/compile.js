@@ -39,22 +39,6 @@ const Compile = (ctx, dom) => {
       Compile(ctx, childNodes[i])
     }
   }
-
-  const textRender = () => {
-    ctx._textUpdateList.forEach((item) => {
-      /* eslint-disable */
-      let oldContent = item.oldContent
-      // 循环更新Text里的表达式
-      for (var key in item.expressionObject) {
-        var newText = (new Function(`with(this){ return ${item.expressionObject[key]}}`)).bind(ctx)()
-        oldContent = oldContent.replace(key, newText)
-      }
-      item.dom.textContent = oldContent
-    })
-  }
-  // 初始化的时候执行一次文本渲染
-  textRender()
-  ctx._renderFunctions.push(textRender)
 }
 
 /**
@@ -87,7 +71,15 @@ Compile.isDirectiveAttr = function (node) {
  */
 Compile.compileEvent = (ctx, dom, node) => {
   const eventName = node.name.slice(1)
-  dom.addEventListener(eventName, (event) => {
+  // 兼容IE 8
+  function addEventListener (ele, event, fn) {
+    if (ele.addEventListener) {
+      ele.addEventListener(event, fn, false)
+    } else {
+      ele.attachEvent('on' + event, fn.bind(ele))
+    }
+  }
+  addEventListener(dom, eventName, (event) => {
     // 如果这里对象中含有这个元素，直接当成函数执行
     if (ctx[node.nodeValue]) {
       try {
@@ -134,7 +126,9 @@ Compile.compileDirective = function (ctx, dom, node) {
         }
         currentValue = ifValue
       }
+      ctx._currentWatcher = render
       render()
+      ctx._currentWatcher = null
       ctx._renderFunctions.push(render)
       break
   }

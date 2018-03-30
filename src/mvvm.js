@@ -10,7 +10,7 @@ const MVVM = function (options) {
   util.assign(this, this._data)
   this._Observers = []
   for (var key in this._data) {
-    this._Observers.push(new Observer(this, key, this._data[key]))
+    this._Observers.push(new Observer(this, key, this._data[key], this))
   }
 
   const rootDom = MVVM.elementSelect(options.el)
@@ -30,6 +30,29 @@ const MVVM = function (options) {
     })
   }
   Compile(this, rootDom)
+  const textRender = () => {
+    this._textUpdateList.forEach((item) => {
+      /* eslint-disable */
+      // 一个观察者函数，这个观察者函数会传递到Observer对象里，获得变量第一次出现的地方
+      const updateFunc = () => {
+        let oldContent = item.oldContent
+        // 循环更新Text里的表达式
+        this.currentComplieDom = item.dom
+        for (var key in item.expressionObject) {
+          var newText = (new Function(`with(this){ return ${item.expressionObject[key]}}`)).bind(this)()
+          oldContent = oldContent.replace(key, newText)
+        }
+        item.dom.textContent = oldContent
+      } 
+      this._currentWatcher = updateFunc
+      updateFunc()
+      // 清空监听器
+      this._currentWatcher = null
+    })
+  }
+  // 初始化的时候执行一次文本渲染
+  textRender()
+  this._renderFunctions.push(textRender)
 
   // TEST 测试更新
   console.log(this)
